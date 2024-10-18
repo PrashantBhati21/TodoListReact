@@ -1,4 +1,5 @@
 import React from "react";
+import { FaCheck, FaEdit, FaTrash } from "react-icons/fa";
 
 const TodosList = ({ list, onDelete, onEdit, onComplete }) => {
   return (
@@ -6,14 +7,23 @@ const TodosList = ({ list, onDelete, onEdit, onComplete }) => {
       <h1 className="mb-2 font-bold">Task List</h1>
       <ul>
         {list &&
-          list.map((item, index) => {
+          list.map((item) => {
             return (
               <li
-                className=" border-t p-2  flex justify-between gap-3 "
-                key={index}
+                className="border-t p-2 flex justify-between gap-3"
+                key={item.id} // Assuming each item has a unique id
               >
                 <div>
-                  <strong>{item.title}</strong>
+                  <strong
+                    className={
+                      item.status === "Completed"
+                        ? "line-through text-gray-500"
+                        : ""
+                    }
+                  >
+                    {item.title}
+                  </strong>
+
                   <br />
                   <em className="border px-2 bg-blue-50 rounded-md">
                     {item.status}
@@ -21,24 +31,20 @@ const TodosList = ({ list, onDelete, onEdit, onComplete }) => {
                 </div>
 
                 <div className="flex gap-3 justify-end">
-                  <button
-                    onClick={() => onComplete(item)}
-                    className="bg-green-500 p-2 py-1 text-white rounded-md"
-                  >
-                    Mark as completed
-                  </button>
-                  <button
+                  {item.status !== "completed" && (
+                    <FaCheck
+                      onClick={() => onComplete(item)}
+                      className="text-green-500 cursor-pointer hover:text-green-700"
+                    />
+                  )}
+                  <FaEdit
                     onClick={() => onEdit(item)}
-                    className="bg-blue-500 p-2 py-1 text-white rounded-md"
-                  >
-                    Edit
-                  </button>
-                  <button
+                    className="text-blue-500 cursor-pointer hover:text-blue-700"
+                  />
+                  <FaTrash
                     onClick={() => onDelete(item)}
-                    className="bg-red-500 p-2 py-1 text-white rounded-lg"
-                  >
-                    Delete
-                  </button>
+                    className="text-red-500 cursor-pointer hover:text-red-700"
+                  />
                 </div>
               </li>
             );

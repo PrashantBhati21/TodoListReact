@@ -4,7 +4,9 @@ import Todo from "./todo/Todos";
 const App = () => {
   return (
     <div>
-         <div className="text-center font-bold py-4 border-b">Todo Application</div>
+      <div className="text-center font-bold py-4 border-b bg-slate-100">
+        Todo Application
+      </div>
       <Todo />
     </div>
   );

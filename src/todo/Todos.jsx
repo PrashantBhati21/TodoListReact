@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import TodosHeader from "./TodosHeader";
-import TodosFooter from "./TodosFooter";
 import TodosForm from "./TodosForm";
 import TodosList from "./TodosList";
+import Modal from "./Modal";
 import { v4 as uuidv4 } from "uuid";
 
 const Todos = () => {
@@ -16,6 +15,7 @@ const Todos = () => {
   const [task, setTask] = useState(initialTask);
   const [editTask, setEditTask] = useState(false);
   const [todoList, setTodoList] = useState([]);
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
 
   const handleOnTaskChange = (e) => {
     const { value } = e.target;
@@ -25,7 +25,6 @@ const Todos = () => {
   const handleOnSubmit = (e) => {
     e.preventDefault();
 
-    // Check if task title is empty
     if (!task.title.trim()) {
       alert("Task title can't be empty! 🤷‍♂️");
       return;
@@ -36,7 +35,6 @@ const Todos = () => {
       const updatedTodoList = todoList.map((item) =>
         item.id === task.id ? task : item
       );
-
       setTodoList(updatedTodoList);
       localStorage.setItem("todoList", JSON.stringify(updatedTodoList));
       setEditTask(false);
@@ -51,14 +49,6 @@ const Todos = () => {
     setTask(initialTask);
   };
 
-  useEffect(() => {
-    const todoListLS = localStorage.getItem("todoList");
-    if (todoListLS) {
-      const todoListLSArr = JSON.parse(todoListLS);
-      setTodoList(todoListLSArr);
-    }
-  }, []);
-
   const handleOnDelete = (item) => {
     const filteredItems = todoList.filter((task) => task.id !== item.id);
     setTodoList(filteredItems);
@@ -68,6 +58,7 @@ const Todos = () => {
   const handleOnEdit = (item) => {
     setEditTask(true);
     setTask(item);
+    setShowModal(true); // Open the modal when editing a task
   };
 
   const handleOnComplete = (task) => {
@@ -78,22 +69,64 @@ const Todos = () => {
     localStorage.setItem("todoList", JSON.stringify(updatedTodoList));
   };
 
+  const handleCloseModal = () => {
+    setShowModal(false); // Close the modal
+    setEditTask(false);
+    setTask(initialTask); // Reset task to initial state if canceled
+  };
+
+  const handleModalSubmit = (e) => {
+    e.preventDefault();
+    // Update the task in the list
+    const updatedTodoList = todoList.map((item) =>
+      item.id === task.id ? task : item
+    );
+    setTodoList(updatedTodoList);
+    localStorage.setItem("todoList", JSON.stringify(updatedTodoList));
+
+    setShowModal(false); // Close modal after saving
+    setEditTask(false);
+    setTask(initialTask); // Reset form after submission
+  };
+
+  useEffect(() => {
+    const todoListLS = localStorage.getItem("todoList");
+    if (todoListLS) {
+      const todoListLSArr = JSON.parse(todoListLS);
+      setTodoList(todoListLSArr);
+    }
+  }, []);
+
   return (
-    <div>
-      {/* <TodosHeader /> */}
-      <TodosForm
-        onSubmit={handleOnSubmit}
+    <div className="flex justify-center items-center min-h-screen bg-slate-100">
+      <div className="w-full max-w-lg p-5 bg-white rounded-lg shadow-lg">
+        {/* Task Form */}
+        <TodosForm
+          onSubmit={handleOnSubmit}
+          task={task}
+          onChange={handleOnTaskChange}
+          buttonText={editTask ? "Edit Task" : "Add Task"}
+        />
+
+        {/* Task List */}
+        <div className="mt-4 max-h-[40vh] overflow-y-auto w-full">
+          <TodosList
+            list={todoList}
+            onDelete={handleOnDelete}
+            onEdit={handleOnEdit}
+            onComplete={handleOnComplete}
+          />
+        </div>
+      </div>
+
+      {/* Edit Modal */}
+      <Modal
+        showModal={showModal}
         task={task}
+        onClose={handleCloseModal}
         onChange={handleOnTaskChange}
-        buttonText={editTask ? "Edit Task" : "Add Task"}
+        onSubmit={handleModalSubmit}
       />
-      <TodosList
-        list={todoList}
-        onDelete={handleOnDelete}
-        onEdit={handleOnEdit}
-        onComplete={handleOnComplete}
-      />
-      {/* <TodosFooter /> */}
     </div>
   );
 };
